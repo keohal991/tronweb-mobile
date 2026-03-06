@@ -1,0 +1,70 @@
+{
+    "name": "tronweb-mobile",
+    "version": "6.2.1-m-2.0.3",
+    "description": "JavaScript SDK that encapsulates the TRON Node HTTP API",
+    "scripts": {
+        "build": "NODE_OPTIONS='--experimental-global-webcrypto' webpack --config webpack.config.js --progress",
+        "postinstall": "./patch.sh"
+    },
+    "dependencies": {
+        "@babel/runtime": "7.26.10",
+        "axios": "1.13.6",
+        "buffer": "6.0.3",
+        "crypto-browserify": "3.12.0",
+        "eventemitter3": "3.1.2"
+    },
+    "devDependencies": {
+        "@babel/core": "7.24.7",
+        "@babel/plugin-transform-class-properties": "7.25.4",
+        "@babel/plugin-transform-optional-chaining": "7.24.8",
+        "@babel/plugin-transform-private-methods": "7.25.4",
+        "@babel/plugin-transform-private-property-in-object": "7.24.7",
+        "@babel/plugin-transform-runtime": "7.24.7",
+        "@babel/plugin-transform-template-literals": "7.24.7",
+        "@babel/preset-env": "7.24.7",
+        "babel-loader": "8.3.0",
+        "rimraf": "2.7.1",
+        "source-map-support": "0.5.21",
+        "terser-webpack-plugin": "5.3.10",
+        "webpack": "5.96.1",
+        "webpack-cli": "5.1.4"
+    },
+    "engines": {
+        "node": "18.19.0",
+        "pnpm": "7.32.0"
+    },
+    "browserslist": {
+        "production": [
+            "chrome >= 67",
+            "edge >= 79",
+            "firefox >= 68",
+            "opera >= 54",
+            "safari >= 14"
+        ],
+        "development": [
+            "last 1 chrome version",
+            "last 1 firefox version",
+            "last 1 safari version"
+        ]
+    },
+    "contributors": [
+        {
+            "name": "TRON",
+            "url": "https://github.com/tronprotocol"
+        }
+    ],
+    "homepage": "https://github.com/tronweb3/tronweb-mobile",
+    "license": "MIT",
+    "repository": "https://github.com/tronweb3/tronweb-mobile.git",
+    "pnpm": {
+        "overrides": {
+          "@babel/helpers": "7.26.10",
+          "pbkdf2": "3.1.3",
+          "brace-expansion": "1.1.12",
+          "form-data": "4.0.4",
+          "sha.js": "2.4.12",
+          "glob>minimatch": "3.1.5",
+          "serialize-javascript": "7.0.3"
+        }
+      }
+}
