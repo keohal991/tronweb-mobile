@@ -1,0 +1,43 @@
+const { TronWeb, utils } = require('../dist/TronWeb');
+import ProxiedProvider from '../proxy/ProxiedProvider';
+
+import { netWorks } from './constants';
+import state from './state';
+import { applySignProxy } from './signing';
+import { setupTronLinkProvider, setupTronProvider } from './providers';
+import { injectTronWeb } from './injection';
+import { setupTip6963 } from './tip6963';
+
+// --- Read native environment ---
+const isTest = window.iTron && window.iTron.isTest ? window.iTron.isTest() : '';
+const netWork = window.iTron && window.iTron.getCurrentNet ? window.iTron.getCurrentNet() : '';
+
+state.cNetwork = netWork ? netWork : (isTest ? 'ShastaNet' : 'MainNet');
+state.httpUrl = netWorks[state.cNetwork];
+state.utils = utils;
+
+// --- Create providers ---
+const fullNode = new ProxiedProvider(state.httpUrl);
+const solidityNode = new ProxiedProvider(state.httpUrl);
+const eventServer = new ProxiedProvider(state.httpUrl);
+
+// --- Create TronWeb instance ---
+state.tronWeb = new TronWeb({ fullNode, solidityNode, eventServer });
+
+state.tronWeb.fullNode.configure(state.httpUrl);
+state.tronWeb.solidityNode.configure(state.httpUrl);
+state.tronWeb.eventServer.configure(state.httpUrl);
+
+// --- Proxy signing methods to native ---
+applySignProxy(state.tronWeb.trx);
+
+// --- Set up window providers ---
+setupTronLinkProvider();   // window.tronLink
+setupTronProvider();       // window.tron
+
+// --- TIP-6963 multi-provider discovery ---
+setupTip6963(window.tron);
+
+// --- Init ---
+injectTronWeb();
+window.tronLink.request({ method: 'tron_requestAccounts' });
