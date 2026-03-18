@@ -137,4 +137,4 @@ If you would like to contribute to tronweb-mobile, you can follow these steps:
 
 ## License
 
-tronweb-mobile is distributed under the MIT License.
+[MIT](https://opensource.org/licenses/MIT)
