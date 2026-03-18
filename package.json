@@ -2,6 +2,17 @@
     "name": "tronweb-mobile",
     "version": "6.2.1-m-2.0.3",
     "description": "tronweb-mobile is a JavaScript library provided for use within the **TronLink App**, designed to integrate Tron-related capabilities into DApp environments.",
+    "keywords": [
+        "Tron",
+        "TronWeb",
+        "TronLink",
+        "dapp",
+        "blockchain",
+        "webview",
+        "mobile",
+        "wallet",
+        "TIP-6963"
+    ],
     "scripts": {
         "build": "NODE_OPTIONS='--experimental-global-webcrypto' webpack --config webpack.config.js --progress",
         "test": "jest --verbose",
