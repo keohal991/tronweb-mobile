@@ -13,6 +13,9 @@
         "wallet",
         "TIP-6963"
     ],
+    "files": [
+        "build"
+    ],
     "scripts": {
         "build": "NODE_OPTIONS='--experimental-global-webcrypto' webpack --config webpack.config.js --progress",
         "test": "jest --verbose",
