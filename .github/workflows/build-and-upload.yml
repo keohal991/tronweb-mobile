@@ -75,3 +75,75 @@ jobs:
           echo "Uploading ${FILE_BASE}.tar.gz"
           aws s3 cp "${FILE_BASE}.zip" "s3://$S3_BUCKET/frontend/tronweb-mobile/"
           aws s3 cp "${FILE_BASE}.tar.gz" "s3://$S3_BUCKET/frontend/tronweb-mobile/"
+
+  download-from-s3:
+    needs: build-and-upload
+    runs-on: [self-hosted, s3-downloader]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Get short commit hash
+        id: vars
+        run: echo "GIT_HASH=$(git rev-parse --short=8 HEAD)" >> $GITHUB_ENV
+
+      - name: Get tag (if exists)
+        id: tag
+        run: |
+          TAG=$(git describe --tags --exact-match 2>/dev/null || echo "")
+          echo "GIT_TAG=$TAG" >> $GITHUB_ENV
+
+      - name: Build file name
+        run: |
+          if [ -n "$GIT_TAG" ] && [ -n "$GIT_HASH" ]; then
+            FILE_BASE="tronweb-mobile_main_${GIT_HASH}_${GIT_TAG}"
+          elif [ -n "$GIT_TAG" ]; then
+            FILE_BASE="tronweb-mobile_main_${GIT_TAG}"
+          else
+            FILE_BASE="tronweb-mobile_main_${GIT_HASH}"
+          fi
+          echo "FILE_BASE=$FILE_BASE" >> $GITHUB_ENV
+
+      - name: Create target and temp directories
+        run: |
+          mkdir -p /data/tronweb-mobile/build/
+          mkdir -p /tmp/tronweb-download
+
+      - name: Download and extract from S3
+        env:
+          S3_BUCKET: ${{ secrets.S3_BUCKET }}
+        run: |
+          cd /tmp/tronweb-download
+          
+          echo "Downloading ${FILE_BASE}.zip from S3..."
+          aws s3 cp "s3://$S3_BUCKET/frontend/tronweb-mobile/${FILE_BASE}.zip" .
+          
+          echo "Download completed!"
+          echo "now path:"
+          pwd
+          ls -l
+          echo "pwd ls -l end"
+          
+          echo "Extracting ${FILE_BASE}.zip..."
+          unzip -o "${FILE_BASE}.zip"
+          echo "unzip ${FILE_BASE}.zip success"
+          
+          echo "now path:"
+          pwd
+          ls -l
+          echo "pwd ls -l end"
+          ls -l /data/tronweb-mobile/build/
+          
+          cd build/
+          echo "now path:"
+          pwd
+          sudo cp -rf * /data/tronweb-mobile/build/
+          
+          echo "Copy completed!"
+          echo "Target directory contents:"
+          ls -lah /data/tronweb-mobile/build/
+
+      - name: Cleanup temp directory
+        run: |
+          rm -rf /tmp/tronweb-download
