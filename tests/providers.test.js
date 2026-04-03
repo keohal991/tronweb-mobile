@@ -95,4 +95,65 @@ describe('window.tron', () => {
             window.tron.request({ method: 'foo_bar' })
         ).rejects.toEqual(RPC_ERRORS.UNSUPPORTED_METHOD);
     });
+
+    describe('eth_signTypedData', () => {
+        const validParams = {
+            domain: { name: 'TRON Mail', version: '1', chainId: '0x2b6653dc', verifyingContract: 'TUe6BwpA7sVTDKaJQoia7FWZpC9sK8WM2t' },
+            types: { Mail: [{ name: 'contents', type: 'string' }] },
+            message: { contents: 'Hello' },
+        };
+
+        beforeEach(() => {
+            state.utils = {
+                _TypedDataEncoder: {
+                    getPrimaryType: (types) => Object.keys(types).filter(k => k !== 'EIP712Domain')[0] || '',
+                },
+            };
+            window.iTron.sign = jest.fn((data, cbName) => {
+                setTimeout(() => window[cbName]('0xtyped_sig'), 5);
+            });
+        });
+
+        test('signs valid typed data', async () => {
+            const result = await window.tron.request({ method: 'eth_signTypedData', params: validParams });
+            expect(result).toBe('0xtyped_sig');
+            expect(window.iTron.sign).toHaveBeenCalledTimes(1);
+        });
+
+        test('rejects when params is missing', async () => {
+            await expect(
+                window.tron.request({ method: 'eth_signTypedData' })
+            ).rejects.toEqual(RPC_ERRORS.INVALID_PARAMS);
+        });
+
+        test('rejects when domain is missing', async () => {
+            await expect(
+                window.tron.request({ method: 'eth_signTypedData', params: { types: validParams.types, message: validParams.message } })
+            ).rejects.toEqual(RPC_ERRORS.INVALID_PARAMS);
+        });
+
+        test('rejects when types is missing', async () => {
+            await expect(
+                window.tron.request({ method: 'eth_signTypedData', params: { domain: validParams.domain, message: validParams.message } })
+            ).rejects.toEqual(RPC_ERRORS.INVALID_PARAMS);
+        });
+
+        test('rejects when message is missing', async () => {
+            await expect(
+                window.tron.request({ method: 'eth_signTypedData', params: { domain: validParams.domain, types: validParams.types } })
+            ).rejects.toEqual(RPC_ERRORS.INVALID_PARAMS);
+        });
+
+        test('rejects when params is a string', async () => {
+            await expect(
+                window.tron.request({ method: 'eth_signTypedData', params: 'invalid' })
+            ).rejects.toEqual(RPC_ERRORS.INVALID_PARAMS);
+        });
+
+        test('rejects when domain is not an object', async () => {
+            await expect(
+                window.tron.request({ method: 'eth_signTypedData', params: { domain: 'bad', types: validParams.types, message: validParams.message } })
+            ).rejects.toEqual(RPC_ERRORS.INVALID_PARAMS);
+        });
+    });
 });
