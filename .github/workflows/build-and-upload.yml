@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - develop
+      - feature/ci_test
 
 jobs:
   build-and-upload:
@@ -67,11 +68,11 @@ jobs:
         run: |
           tar -czf "${FILE_BASE}.tar.gz" ./build
 
-      - name: Upload to S3
-        env:
-          S3_BUCKET: ${{ secrets.S3_BUCKET }}
-        run: |
-          echo "Uploading ${FILE_BASE}.zip"
-          echo "Uploading ${FILE_BASE}.tar.gz"
-          aws s3 cp "${FILE_BASE}.zip" "s3://$S3_BUCKET/frontend/tronweb-mobile/"
-          aws s3 cp "${FILE_BASE}.tar.gz" "s3://$S3_BUCKET/frontend/tronweb-mobile/"
+      # - name: Upload to S3
+      #   env:
+      #     S3_BUCKET: ${{ secrets.S3_BUCKET }}
+      #   run: |
+      #     echo "Uploading ${FILE_BASE}.zip"
+      #     echo "Uploading ${FILE_BASE}.tar.gz"
+      #     aws s3 cp "${FILE_BASE}.zip" "s3://$S3_BUCKET/frontend/tronweb-mobile/"
+      #     aws s3 cp "${FILE_BASE}.tar.gz" "s3://$S3_BUCKET/frontend/tronweb-mobile/"
