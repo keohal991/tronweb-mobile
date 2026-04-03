@@ -62,7 +62,7 @@ class ProxiedProvider extends HttpProvider {
             };
 
             Object.defineProperty(res, '__payload__', payloadDesc);
-            if (res.transaction) {
+            if (res.transaction && typeof res.transaction === 'object') {
                 Object.defineProperty(res.transaction, '__payload__', payloadDesc);
             }
 
