@@ -1,0 +1,77 @@
+name: Build and Upload to S3
+
+on:
+  push:
+    branches:
+      - main
+      - feature/openSource
+
+jobs:
+  build-and-upload:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18.19.0
+
+      - name: Load nvm
+        run: |
+          export NVM_DIR="$HOME/.nvm"
+          [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+          nvm use 18.19.0
+          npm install -g pnpm@7.32.0
+          pnpm --version
+
+
+      - name: Install dependencies
+        run: |
+          unset NODE_ENV
+          export NVM_DIR="$HOME/.nvm"
+          [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+          nvm use 18.19.0
+          npm install -g pnpm@7.32.0
+          pnpm install
+          pnpm run buildPatch
+
+      - name: Get short commit hash
+        id: vars
+        run: echo "GIT_HASH=$(git rev-parse --short=8 HEAD)" >> $GITHUB_ENV
+
+      - name: Get tag (if exists)
+        id: tag
+        run: |
+          TAG=$(git describe --tags --exact-match 2>/dev/null || echo "")
+          echo "GIT_TAG=$TAG" >> $GITHUB_ENV
+
+      - name: Build file name
+        run: |
+          if [ -n "$GIT_TAG" ] && [ -n "$GIT_HASH" ]; then
+            FILE_BASE="tronweb-mobile_main_${GIT_HASH}_${GIT_TAG}"
+          elif [ -n "$GIT_TAG" ]; then
+            FILE_BASE="tronweb-mobile_main_${GIT_TAG}"
+          else
+            FILE_BASE="tronweb-mobile_main_${GIT_HASH}"
+          fi
+          echo "FILE_BASE=$FILE_BASE" >> $GITHUB_ENV
+
+      - name: Zip build folder
+        run: |
+          zip -r "${FILE_BASE}.zip" ./build
+
+      - name: Create tar.gz build folder
+        run: |
+          tar -czf "${FILE_BASE}.tar.gz" ./build
+
+      - name: Upload to S3
+        env:
+          S3_BUCKET: ${{ secrets.S3_BUCKET }}
+        run: |
+          echo "Uploading ${FILE_BASE}.zip"
+          echo "Uploading ${FILE_BASE}.tar.gz"
+          aws s3 cp "${FILE_BASE}.zip" "s3://$S3_BUCKET/frontend/tronweb-mobile/"
+          aws s3 cp "${FILE_BASE}.tar.gz" "s3://$S3_BUCKET/frontend/tronweb-mobile/"

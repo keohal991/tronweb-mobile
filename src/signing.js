@@ -80,7 +80,13 @@ export function proxySignTransaction(transaction, cb, type) {
             if (cb) { cb(null, sinTransStr); return sinTransStr; }
             return sinTransStr;
         }
-        return JSON.parse(sinTransStr);
+        try {
+            return JSON.parse(sinTransStr);
+        } catch (e) {
+            const parseErr = new Error(`Invalid signed transaction format: ${e.message}`);
+            if (cb) { cb(parseErr); return; }
+            throw parseErr;
+        }
     }, (err) => {
         if (cb) { cb(err); return; }
         throw err;
@@ -118,7 +124,7 @@ function getEIP712Data(domain, types, value) {
 export function proxySignTypedData(domain, types, value) {
     const transStr = JSON.stringify(getEIP712Data(domain, types, value));
 
-    return withNativeCallback(SIGN_TIMEOUT, (cbName, errName) => {
+    return withNativeCallback(SIGN_TIMEOUT, (cbName) => {
         window.iTron.sign(transStr, cbName);
     });
 }
@@ -132,4 +138,5 @@ export function applySignProxy(trxObj) {
         return proxySignTransaction(transaction, cb, 'signMessageV2');
     };
     trxObj._signTypedData = proxySignTypedData;
+    trxObj.signTypedData = proxySignTypedData;
 }

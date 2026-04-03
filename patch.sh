@@ -1,4 +1,5 @@
 #!/bin/bash
+
 echo "-------------start build tronweb.js--------------"
 
 rimraf tmp && mkdir tmp && cd tmp/ 
@@ -7,6 +8,7 @@ cd tronweb
 path=$(dirname $(dirname "$PWD"))
 cp -r $path/tronweb-diff.patch tronweb-diff.patch
 git apply tronweb-diff.patch
+
 npm install
 
 echo "-------------end build tronweb.js--------------"
@@ -31,9 +33,13 @@ if [ "$md5_local" == "$md5_new" ] ; then
   fi
   cp -r ./dist/TronWeb.js $destDir/TronWeb.js 
   cd $path
+  rimraf build
   pnpm run build
 else
   echo -e "\033[31m TronWeb.js md5 hash not match \033[0m"
 fi
 
 echo "-------------end md5 compare--------------"
+
+cd $path
+rm -rf tmp

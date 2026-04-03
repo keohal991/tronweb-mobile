@@ -54,14 +54,17 @@ class ProxiedProvider extends HttpProvider {
         }
 
         return super.request(endpoint, payload, method).then(res => {
-            const response = res.transaction || res;
-
-            Object.defineProperty(response, '__payload__', {
+            const payloadDesc = {
                 writable: false,
                 enumerable: false,
                 configurable: false,
                 value: payload
-            });
+            };
+
+            Object.defineProperty(res, '__payload__', payloadDesc);
+            if (res.transaction) {
+                Object.defineProperty(res.transaction, '__payload__', payloadDesc);
+            }
 
             return res;
         });
