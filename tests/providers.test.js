@@ -25,7 +25,9 @@ afterEach(() => {
     delete window.tronLink;
     delete window.tron;
     delete window.tronWeb;
-    delete window.onRequestAddressCallBack;
+    Object.keys(window).forEach((key) => {
+        if (key.startsWith('__')) delete window[key];
+    });
 });
 
 describe('window.tronLink', () => {

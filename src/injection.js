@@ -1,6 +1,11 @@
 import { version } from '../package.json';
-import { ChainIds, RPC_ERRORS, netWorks } from './constants';
+import { ChainIds, RPC_ERRORS, netWorks, SIGN_TIMEOUT } from './constants';
 import state from './state';
+
+let _cbId = 0;
+function genCallbackId(prefix) {
+    return `__${prefix}_${++_cbId}_${Date.now()}__`;
+}
 
 // --- Core injection: set address on all providers ---
 export function injectTronWeb(addr) {
@@ -28,7 +33,26 @@ export function injectTronWeb(addr) {
 // --- Account request (used by both tronLink and tron providers) ---
 export function requestAccount(type) {
     return new Promise((resolve, reject) => {
-        window.onRequestAddressCallBack = function (address) {
+        const cbName = genCallbackId('reqAddr');
+        let settled = false;
+
+        const cleanup = () => {
+            delete window[cbName];
+        };
+
+        const timer = setTimeout(() => {
+            if (settled) return;
+            settled = true;
+            cleanup();
+            reject(new Error('Request timed out.'));
+        }, SIGN_TIMEOUT);
+
+        window[cbName] = function (address) {
+            if (settled) return;
+            settled = true;
+            clearTimeout(timer);
+            cleanup();
+
             const { tronWeb } = state;
             if (tronWeb.isAddress(address)) {
                 injectTronWeb(address);
@@ -43,8 +67,18 @@ export function requestAccount(type) {
         };
 
         if (window.iTron && window.iTron.requestAddress) {
-            window.iTron.requestAddress('onRequestAddressCallBack');
+            try {
+                window.iTron.requestAddress(cbName);
+            } catch (e) {
+                settled = true;
+                clearTimeout(timer);
+                cleanup();
+                reject(e);
+            }
         } else {
+            settled = true;
+            clearTimeout(timer);
+            cleanup();
             reject(new Error('unknown error'));
         }
     });
