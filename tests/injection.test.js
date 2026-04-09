@@ -26,7 +26,9 @@ beforeEach(() => {
 afterEach(() => {
     delete window.iTron;
     delete window.tronWeb;
-    delete window.onRequestAddressCallBack;
+    Object.keys(window).forEach((key) => {
+        if (key.startsWith('__')) delete window[key];
+    });
 });
 
 describe('injectTronWeb', () => {

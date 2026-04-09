@@ -12,7 +12,8 @@ import { setupTip6963 } from './tip6963';
 const isTest = window.iTron && window.iTron.isTest ? window.iTron.isTest() : '';
 const netWork = window.iTron && window.iTron.getCurrentNet ? window.iTron.getCurrentNet() : '';
 
-state.cNetwork = netWork ? netWork : (isTest ? 'ShastaNet' : 'MainNet');
+const validNetwork = netWork && Object.prototype.hasOwnProperty.call(netWorks, netWork) ? netWork : null;
+state.cNetwork = validNetwork || (isTest ? 'ShastaNet' : 'MainNet');
 state.httpUrl = netWorks[state.cNetwork];
 state.utils = utils;
 

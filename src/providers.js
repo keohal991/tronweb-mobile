@@ -1,6 +1,7 @@
 import { ChainIds, RPC_ERRORS } from './constants';
 import state from './state';
 import { requestAccount } from './injection';
+import { proxySignTypedData } from './signing';
 
 // --- window.tronLink (TronLink-compatible provider) ---
 export function setupTronLinkProvider() {
@@ -26,8 +27,6 @@ export function setupTronProvider() {
         // EventEmitter (bound to avoid this-context issues)
         on: ee.on.bind(ee),
         removeListener: ee.removeListener.bind(ee),
-        emit: ee.emit.bind(ee),
-        _events: ee._events,
 
         isConnected: function () {
             return state.connected;
@@ -37,6 +36,16 @@ export function setupTronProvider() {
             switch (method) {
                 case 'eth_requestAccounts':
                     return requestAccount('tron');
+
+                case 'eth_signTypedData': {
+                    if (!params || typeof params !== 'object'
+                        || !params.domain || typeof params.domain !== 'object'
+                        || !params.types || typeof params.types !== 'object'
+                        || !params.message || typeof params.message !== 'object') {
+                        return Promise.reject(RPC_ERRORS.INVALID_PARAMS);
+                    }
+                    return proxySignTypedData(params.domain, params.types, params.message);
+                }
 
                 case 'wallet_switchEthereumChain': {
                     if (!params || !params[0] || !params[0].chainId) {

@@ -88,4 +88,20 @@ describe('ProxiedProvider', () => {
         // __payload__ should not be enumerable
         expect(Object.keys(res)).not.toContain('__payload__');
     });
+
+    test('adds __payload__ to both res and res.transaction when transaction exists', async () => {
+        const tx = { txID: 'abc123', raw_data: {} };
+        jest.spyOn(
+            Object.getPrototypeOf(Object.getPrototypeOf(provider)),
+            'request'
+        ).mockResolvedValue({ transaction: tx, result: { result: true } });
+
+        provider.configure('https://api.trongrid.io');
+        const res = await provider.request('/wallet/createtransaction', { to: 'T1' });
+
+        expect(res.__payload__).toEqual({ to: 'T1' });
+        expect(res.transaction.__payload__).toEqual({ to: 'T1' });
+        expect(Object.keys(res)).not.toContain('__payload__');
+        expect(Object.keys(res.transaction)).not.toContain('__payload__');
+    });
 });
