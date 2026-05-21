@@ -122,8 +122,8 @@ If you would like to contribute to tronweb-mobile, you can follow these steps:
 
 ### Prerequisites
 
-- **Node.js**: `v18.19.0` (recommended to use [nvm](https://github.com/nvm-sh/nvm) for version management)
-- **pnpm**: `v7.32.0` (install via `npm install -g pnpm@7.32.0`)
+- **Node.js**: `v20.19.2` (recommended to use [nvm](https://github.com/nvm-sh/nvm) for version management)
+- **pnpm**: `v10.12.4` (install via `npm install -g pnpm@10.12.4`)
 
 ### Steps
 
