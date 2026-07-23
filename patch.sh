@@ -4,7 +4,7 @@ set -euo pipefail
 echo "-------------start build tronweb.js--------------"
 
 rimraf tmp && mkdir tmp && cd tmp/
-git clone -b v6.3.0 https://github.com/tronprotocol/tronweb
+git clone -b v6.4.0 https://github.com/tronprotocol/tronweb
 cd tronweb
 path=$(dirname $(dirname "$PWD"))
 cp -r "$path/tronweb-diff.patch" tronweb-diff.patch
@@ -16,7 +16,7 @@ echo "-------------end build tronweb.js--------------"
 
 echo "-------------start md5 compare--------------"
 
-md5_local="92689913860087717884ecb1295a4c2d"
+md5_local="303a21a9e4f7323d7cacf780ba070efb"
 if which md5 >/dev/null 2>&1; then
     md5_new=$(md5 -q ./dist/TronWeb.js)
 else
